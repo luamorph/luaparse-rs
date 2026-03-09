@@ -6,15 +6,6 @@ use crate::{Span, LexError};
 #[derive(Logos, Debug, Clone, PartialEq)]
 #[logos(skip r"[ \t\r\n]+")]
 pub enum Token {
-    // "shebang" is a line at the start of the file, it'll look like this:
-    // #!/usr/bin/lua
-    // it's used in unix-like systems to indicate which interpreter should be used to run the script
-    // we give it a high priority so that it matches before any other token
-    // since its only valid at the start of the file (in lua), we don't need to worry about it appearing elsewhere
-    // unless it's invalid
-    #[regex(r"#![^\n]*", priority = 10)]
-    Shebang,
-
     #[token("true")]
     True,
     
@@ -528,6 +519,16 @@ fn unescape_string(s: &str) -> String {
 }
 
 pub fn lex(source: &str) -> Result<Vec<(Token, Span)>, LexError> {
+    // skip shebang line if present — this is a unix execution hint, not a language token
+    let source = if source.starts_with("#!") {
+        match source.find('\n') {
+            Some(pos) => &source[pos + 1..],
+            None => "",
+        }
+    } else {
+        source
+    };
+
     let mut tokens = Vec::new();
     let mut lexer = Token::lexer(source);
     
@@ -535,14 +536,6 @@ pub fn lex(source: &str) -> Result<Vec<(Token, Span)>, LexError> {
         let span = lexer.span();
         match token_result {
             Ok(token) => {
-                if matches!(token, Token::Shebang) {
-                    if span.start == 0 {
-                        continue;
-                    } else {
-                        return Err(LexError::InvalidShebang { span }); // shebang not at start
-                    }
-                }
-                
                 if let Token::Number(ref num) = token {
                     if !validate_number(num) {
                         return Err(LexError::InvalidNumber { span });
@@ -642,5 +635,5 @@ pub fn lex_for_version<V: crate::marker::LuaVersion>(
             };
             (t, span)
         })
-        .collect())  // <-- Add this
+        .collect()) 
 }

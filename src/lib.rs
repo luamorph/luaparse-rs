@@ -55,8 +55,6 @@ pub enum LexError {
     UnterminatedComment { span: Span },
     #[error("invalid escape sequence: \\{escape}")]
     InvalidEscape { escape: char, span: Span },
-    #[error("shebang must be at the start of the file")]
-    InvalidShebang { span: Span },
 }
 
 #[cfg(feature = "wasm")]
