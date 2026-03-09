@@ -1,0 +1,31 @@
+[package]
+name = "luaparse"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Multi-version Lua parser supporting Lua 5.1-5.4 and Luau"
+repository = "https://github.com/luamorph/luaparse"
+readme = "README.md"
+keywords = ["lua", "luau", "parser", "ast", "roblox"]
+categories = ["parsing", "development-tools"]
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+wasm-bindgen = { version = "0.2", optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+logos = { version = "0.15.1", default-features = false, features = ["export_derive"] }
+sealed = "0.6.0"
+thiserror = "2.0.17"
+
+[features]
+default = ["std", "luau"]
+std = ["logos/std"]
+wasm = ["dep:wasm-bindgen"]
+luau = []
+lua51 = []
+lua52 = []
+lua53 = []
+lua54 = []
