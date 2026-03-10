@@ -207,7 +207,7 @@ fn test_parenthesized_assignment() {
 
 #[test]
 fn test_invalid_assignment() {
-    use luaparse_rs::s::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "5 = x";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -218,7 +218,7 @@ fn test_invalid_assignment() {
 
 #[test]
 fn test_simple_interpolation() {
-    use luaparse_rs::s::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
+    use luaparse_rs::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
 
     let input = r#"local msg = `hello {name}`"#;
     let parser = Parser::<Luau>::new(input).unwrap();

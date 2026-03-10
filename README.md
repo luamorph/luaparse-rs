@@ -1,4 +1,4 @@
-# luaparse
+# luaparse-rs
 
 A multi-version Lua parser written in Rust with support for **Lua 5.1, 5.2, 5.3, 5.4, and Luau** via compile-time feature flags.
 
@@ -12,7 +12,7 @@ A multi-version Lua parser written in Rust with support for **Lua 5.1, 5.2, 5.3,
 
 ```toml
 [dependencies]
-luaparse = { version = "0.1", features = ["luau"] }
+luaparse-rs = { version = "0.1", features = ["luau"] }
 ```
 
 Available features: `luau` (default), `lua51`, `lua52`, `lua53`, `lua54`
@@ -20,7 +20,7 @@ Available features: `luau` (default), `lua51`, `lua52`, `lua53`, `lua54`
 ## Usage
 
 ```rust
-use luaparse-rs::{Parser, Luau};
+use luaparse_rs::{Parser, Luau};
 
 let input = r#"
 local function greet(name: string): string
@@ -36,7 +36,7 @@ println!("{:#?}", ast);
 Switch versions at compile time:
 
 ```rust
-use luaparse-rs::{Parser, Lua54};
+use luaparse_rs::{Parser, Lua54};
 
 let parser = Parser::<Lua54>::new("local x <const> = 5").unwrap();
 let ast = parser.parse().unwrap();
