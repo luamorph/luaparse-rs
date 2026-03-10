@@ -1,10 +1,10 @@
 [package]
-name = "luaparse"
+name = "luaparse-rs"
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Multi-version Lua parser supporting Lua 5.1-5.4 and Luau"
-repository = "https://github.com/luamorph/luaparse"
+repository = "https://github.com/luamorph/luaparse-rs"
 readme = "README.md"
 keywords = ["lua", "luau", "parser", "ast", "roblox"]
 categories = ["parsing", "development-tools"]

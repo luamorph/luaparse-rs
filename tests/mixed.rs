@@ -1,4 +1,4 @@
-use luaparse::{Parser, Luau, Lua51, Lua52, Lua53, Lua54};
+use luaparse_rs::{Parser, Luau, Lua51, Lua52, Lua53, Lua54};
 
 #[test]
 fn test_paren_call_lua51() {

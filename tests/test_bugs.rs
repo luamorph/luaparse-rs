@@ -1,4 +1,4 @@
-use luaparse::{Parser, Lua51, Luau};
+use luaparse_rs::{Parser, Lua51, Luau};
 
 #[test]
 fn test_normal_line_comment() {

@@ -1,4 +1,4 @@
-use luaparse::{Parser, Luau};
+use luaparse_rs::{Parser, Luau};
 
 #[test]
 fn test_local_declaration() {
@@ -52,7 +52,7 @@ fn test_table_construction() {
 
 #[test]
 fn test_simple_assignment() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "x = 10";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -69,7 +69,7 @@ fn test_simple_assignment() {
 
 #[test]
 fn test_multiple_assignment() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "x, y, z = 1, 2, 3";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -88,7 +88,7 @@ fn test_multiple_assignment() {
 
 #[test]
 fn test_field_assignment() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "obj.field = 20";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -105,7 +105,7 @@ fn test_field_assignment() {
 
 #[test]
 fn test_index_assignment() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "arr[123] = 1234";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -122,7 +122,7 @@ fn test_index_assignment() {
 
 #[test]
 fn test_nested_field_assignment() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "obj.nested.field = 123";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -139,7 +139,7 @@ fn test_nested_field_assignment() {
 
 #[test]
 fn test_compound_assignment() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "x += 5";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -156,7 +156,7 @@ fn test_compound_assignment() {
 
 #[test]
 fn test_call_statement() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "print('hello')";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -173,7 +173,7 @@ fn test_call_statement() {
 
 #[test]
 fn test_method_call_statement() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "obj:method(10)";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -190,7 +190,7 @@ fn test_method_call_statement() {
 
 #[test]
 fn test_parenthesized_assignment() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "(x()).field = 99";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -207,7 +207,7 @@ fn test_parenthesized_assignment() {
 
 #[test]
 fn test_invalid_assignment() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::s::{Parser, Luau};
 
     let input = "5 = x";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -218,7 +218,7 @@ fn test_invalid_assignment() {
 
 #[test]
 fn test_simple_interpolation() {
-    use luaparse::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
+    use luaparse_rs::s::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
 
     let input = r#"local msg = `hello {name}`"#;
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -253,7 +253,7 @@ fn test_simple_interpolation() {
 
 #[test]
 fn test_complex_interpolation() {
-    use luaparse::{Parser, Luau, ast::{StmtKind, ExprKind}};
+    use luaparse_rs::{Parser, Luau, ast::{StmtKind, ExprKind}};
 
     let input = r#"local msg = `result: {x + y * 2}`"#;
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -273,7 +273,7 @@ fn test_complex_interpolation() {
 
 #[test]
 fn test_multiple_interpolations() {
-    use luaparse::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
+    use luaparse_rs::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
 
     let input = r#"local msg = `{a} + {b} = {a + b}`"#;
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -300,7 +300,7 @@ fn test_multiple_interpolations() {
 
 #[test]
 fn test_nested_interpolation_braces() {
-    use luaparse::{Parser, Luau, ast::{StmtKind, ExprKind}};
+    use luaparse_rs::{Parser, Luau, ast::{StmtKind, ExprKind}};
 
     let input = r#"local msg = `table: {t.field}`"#;
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -318,7 +318,7 @@ fn test_nested_interpolation_braces() {
 
 #[test]
 fn test_interpolation_with_function_call() {
-    use luaparse::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
+    use luaparse_rs::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
 
     let input = r#"local msg = `result: {tostring(x)}`"#;
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -340,7 +340,7 @@ fn test_interpolation_with_function_call() {
 
 #[test]
 fn test_empty_interpolation_error() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = r#"local msg = `hello {}`"#;
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -351,7 +351,7 @@ fn test_empty_interpolation_error() {
 
 #[test]
 fn test_escaped_braces() {
-    use luaparse::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
+    use luaparse_rs::{Parser, Luau, ast::{StmtKind, ExprKind, InterpolationSegment}};
 
     let input = r#"local msg = `literal \{ and \}`"#;
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -373,7 +373,7 @@ fn test_escaped_braces() {
 
 #[test]
 fn test_semicolons() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "local x = 1; local y = 2; print(x)";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -386,7 +386,7 @@ fn test_semicolons() {
 
 #[test]
 fn test_trailing_comma_table() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "local t = { a = 1, b = 2, }";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -397,7 +397,7 @@ fn test_trailing_comma_table() {
 
 #[test]
 fn test_hex_float() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "local x = 0x1.8p2";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -408,7 +408,7 @@ fn test_hex_float() {
 
 #[test]
 fn test_string_escapes() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = r#"local s = "\x41\u{1F600}\z
         continued""#;
@@ -420,7 +420,7 @@ fn test_string_escapes() {
 
 #[test]
 fn test_numeric_underscores() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "local n = 1_000_000";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -431,7 +431,7 @@ fn test_numeric_underscores() {
 
 #[test]
 fn test_immediate_invocation() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = r#"
         local x = (function()
@@ -450,7 +450,7 @@ fn test_immediate_invocation() {
 
 #[test]
 fn test_parenthesized_call() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = "(print)('hello')";
 
@@ -463,7 +463,7 @@ fn test_parenthesized_call() {
 
 #[test]
 fn test_string_literal_call() {
-    use luaparse::{Parser, Luau, ast::{StmtKind, ExprKind}};
+    use luaparse_rs::{Parser, Luau, ast::{StmtKind, ExprKind}};
 
     let input = r#"print"hello world""#;
 
@@ -482,7 +482,7 @@ fn test_string_literal_call() {
 
 #[test]
 fn test_table_literal_call() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::{Parser, Luau, ast::StmtKind};
 
     let input = r#"func{x = 1, y = 2}"#;
 
@@ -495,7 +495,7 @@ fn test_table_literal_call() {
 
 #[test]
 fn test_chained_literal_calls() {
-    use luaparse::{Parser, Luau, ast::{StmtKind, ExprKind}};
+    use luaparse_rs::{Parser, Luau, ast::{StmtKind, ExprKind}};
 
     let input = r#"local x = func("str"){}"#;
 
@@ -520,7 +520,7 @@ fn test_chained_literal_calls() {
 
 #[test]
 fn test_string_then_table_call() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = r#"func"hello"{x = 1}"#;
 
@@ -533,7 +533,7 @@ fn test_string_then_table_call() {
 
 #[test]
 fn test_multiple_string_calls() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = r#"func"a""b""c""#;
 
@@ -546,7 +546,7 @@ fn test_multiple_string_calls() {
 
 #[test]
 fn test_varargs_must_be_last() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "function f(..., a) end";
 
@@ -563,7 +563,7 @@ fn test_varargs_must_be_last() {
 
 #[test]
 fn test_varargs_multiple_positions() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "function f(a, ..., b, ...) end";
 
@@ -575,7 +575,7 @@ fn test_varargs_multiple_positions() {
 
 #[test]
 fn test_varargs_at_end_valid() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "function f(a, b, ...) end";
 
@@ -587,7 +587,7 @@ fn test_varargs_at_end_valid() {
 
 #[test]
 fn test_long_string_nested() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = r#"
         local s = [=[
@@ -604,7 +604,7 @@ fn test_long_string_nested() {
 
 #[test]
 fn test_long_string_different_levels() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = r#"
         local a = [[simple]]
@@ -620,7 +620,7 @@ fn test_long_string_different_levels() {
 
 #[test]
 fn test_unterminated_long_string() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "local s = [[unterminated";
     let parser = Parser::<Luau>::new(input);
@@ -630,7 +630,7 @@ fn test_unterminated_long_string() {
 
 #[test]
 fn test_invalid_hex_number() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "local x = 0x";
     let parser = Parser::<Luau>::new(input);
@@ -640,7 +640,7 @@ fn test_invalid_hex_number() {
 
 #[test]
 fn test_invalid_exponent() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "local x = 1e";
     let parser = Parser::<Luau>::new(input);
@@ -650,7 +650,7 @@ fn test_invalid_exponent() {
 
 #[test]
 fn test_valid_hex_float() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = "local x = 0x1.8p2";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -661,7 +661,7 @@ fn test_valid_hex_float() {
 
 #[test]
 fn test_unicode_identifiers() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = r#"
         local café = 1231
@@ -678,7 +678,7 @@ fn test_unicode_identifiers() {
 
 #[test]
 fn test_shebang() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = r#"#!/usr/bin/env lua
     local x = 5
@@ -692,7 +692,7 @@ fn test_shebang() {
 
 #[test]
 fn test_shebang_not_at_start() {
-    use luaparse::{Parser, Luau};
+    use luaparse_rs::{Parser, Luau};
 
     let input = r#"
     local x = 5

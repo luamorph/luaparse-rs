@@ -1,6 +1,6 @@
 #[test]
 fn test_continue_as_identifier_lua51() {
-    use luaparse::{Parser, Lua51, ast::StmtKind};
+    use luaparse_rs::{Parser, Lua51, ast::StmtKind};
 
     let input = "local continue = 5";
     let parser = Parser::<Lua51>::new(input).unwrap();
@@ -22,7 +22,7 @@ fn test_continue_as_identifier_lua51() {
 
 #[test]
 fn test_continue_as_keyword_luau() {
-    use luaparse::{Parser, Luau, ast::StmtKind};
+    use luaparse_rs::s::s::s::{Parser, Luau, ast::StmtKind};
 
     let input = "continue";
     let parser = Parser::<Luau>::new(input).unwrap();
@@ -39,7 +39,7 @@ fn test_continue_as_keyword_luau() {
 
 #[test]
 fn test_type_as_identifier_lua51() {
-    use luaparse::{Parser, Lua51, ast::StmtKind};
+    use luaparse_rs::s::s::s::{Parser, Lua51, ast::StmtKind};
 
     let input = "local type = 'string'";
     let parser = Parser::<Lua51>::new(input).unwrap();
@@ -57,7 +57,7 @@ fn test_type_as_identifier_lua51() {
 
 #[test]
 fn test_export_as_identifier_lua51() {
-    use luaparse::{Parser, Lua51, ast::StmtKind};
+    use luaparse_rs::s::s::{Parser, Lua51, ast::StmtKind};
 
     let input = "local export = 10";
     let parser = Parser::<Lua51>::new(input).unwrap();
@@ -75,7 +75,7 @@ fn test_export_as_identifier_lua51() {
 
 #[test]
 fn test_goto_label_lua52() {
-    use luaparse::{Parser, Lua52, ast::StmtKind};
+    use luaparse_rs::s::{Parser, Lua52, ast::StmtKind};
 
     let input = r#"
         goto skip
@@ -102,7 +102,7 @@ fn test_goto_label_lua52() {
 
 #[test]
 fn test_goto_as_identifier_lua51() {
-    use luaparse::{Parser, Lua51, ast::StmtKind};
+    use luaparse_rs::{Parser, Lua51, ast::StmtKind};
 
     let input = "local goto = 'label'";
     let parser = Parser::<Lua51>::new(input).unwrap();
@@ -120,7 +120,7 @@ fn test_goto_as_identifier_lua51() {
 
 #[test]
 fn test_bitwise_ops_lua53() {
-    use luaparse::{Parser, Lua53, ast::ExprKind};
+    use luaparse_rs::{Parser, Lua53, ast::ExprKind};
 
     let input = "local x = 5 & 3";
     let parser = Parser::<Lua53>::new(input).unwrap();
@@ -132,7 +132,7 @@ fn test_bitwise_ops_lua53() {
 
 #[test]
 fn test_bitwise_not_lua53() {
-    use luaparse::{Parser, Lua53};
+    use luaparse_rs::{Parser, Lua53};
 
     let input = "local x = ~5";
     let parser = Parser::<Lua53>::new(input).unwrap();
@@ -141,7 +141,7 @@ fn test_bitwise_not_lua53() {
     assert!(result.is_ok());
 }
 
-use luaparse::{Parser, Lua52, Lua53, Lua54, Luau, ast::StmtKind};
+use luaparse_rs::{Parser, Lua52, Lua53, Lua54, Luau, ast::StmtKind};
 
 #[test]
 fn test_goto_forward_jump_lua52() {
@@ -169,7 +169,7 @@ fn test_goto_forward_jump_lua52() {
 
 #[test]
 fn test_goto_fails_lua51() {
-    use luaparse::Lua51;
+    use luaparse_rs::s::Lua51;
 
     let input = "goto label";
     let parser = Parser::<Lua51>::new(input).unwrap();
@@ -181,7 +181,7 @@ fn test_goto_fails_lua51() {
 
 #[test]
 fn test_bitwise_precedence_lua53() {
-    use luaparse::ast::{ExprKind, BinaryOperator};
+    use luaparse_rs::s::ast::{ExprKind, BinaryOperator};
 
     // 1 | 2 & 3 should parse as 1 | (2 & 3)
     let input = "local x = 1 | 2 & 3";
@@ -215,13 +215,13 @@ fn test_bitwise_fails_lua52() {
     // lexer  should fail or parser should reject
     assert!(result.is_err());
     if let Err(e) = result {
-        assert!(matches!(e, luaparse::ParseError::UnsupportedFeature { .. }));
+        assert!(matches!(e, luaparse_rs::s::ParseError::UnsupportedFeature { .. }));
     }
 }
 
 #[test]
 fn test_const_attribute_lua54() {
-    use luaparse::ast::StmtKind;
+    use luaparse_rs::ast::StmtKind;
 
     let input = "local x <const> = 5";
     let parser = Parser::<Lua54>::new(input).unwrap();

@@ -1,4 +1,4 @@
-use luaparse::{Parser, Luau, Lua51, Lua52, Lua53, Lua54};
+use luaparse_rs::{Parser, Luau, Lua51, Lua52, Lua53, Lua54};
 
 #[test]
 fn test_const_simple_luau() {
@@ -158,7 +158,7 @@ fn test_const_sets_is_const_flag_luau() {
     let ast = Parser::<Luau>::new(input).unwrap().parse().unwrap();
     let stmt = &ast.block.statements[0];
     match &stmt.kind {
-        luaparse::ast::StmtKind::LocalDeclaration(decl) => {
+        luaparse_rs::ast::StmtKind::LocalDeclaration(decl) => {
             assert!(decl.is_const, "const declaration should have is_const = true");
             assert!(decl.values.is_some(), "const declaration must have values");
         }
@@ -172,7 +172,7 @@ fn test_local_does_not_set_is_const_luau() {
     let ast = Parser::<Luau>::new(input).unwrap().parse().unwrap();
     let stmt = &ast.block.statements[0];
     match &stmt.kind {
-        luaparse::ast::StmtKind::LocalDeclaration(decl) => {
+        luaparse_rs::ast::StmtKind::LocalDeclaration(decl) => {
             assert!(!decl.is_const, "local declaration should have is_const = false");
         }
         other => panic!("Expected LocalDeclaration, got {:?}", other),

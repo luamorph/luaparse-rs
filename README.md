@@ -20,7 +20,7 @@ Available features: `luau` (default), `lua51`, `lua52`, `lua53`, `lua54`
 ## Usage
 
 ```rust
-use luaparse::{Parser, Luau};
+use luaparse-rs::{Parser, Luau};
 
 let input = r#"
 local function greet(name: string): string
@@ -36,7 +36,7 @@ println!("{:#?}", ast);
 Switch versions at compile time:
 
 ```rust
-use luaparse::{Parser, Lua54};
+use luaparse-rs::{Parser, Lua54};
 
 let parser = Parser::<Lua54>::new("local x <const> = 5").unwrap();
 let ast = parser.parse().unwrap();

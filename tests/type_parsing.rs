@@ -1,4 +1,4 @@
-use luaparse::{Parser, Luau};
+use luaparse_rs::{Parser, Luau};
 
 #[test]
 fn test_simple_type_alias() {
@@ -63,7 +63,7 @@ fn test_typeof() {
 
 #[test]
 fn test_const_attribute_lua54() {
-    use luaparse::{Parser, Lua54, ast::StmtKind};
+    use luaparse_rs::{Parser, Lua54, ast::StmtKind};
 
     let input = "local x <const> = 5";
     let parser = Parser::<Lua54>::new(input).unwrap();
@@ -79,7 +79,7 @@ fn test_const_attribute_lua54() {
 
 #[test]
 fn test_close_attribute_lua54() {
-    use luaparse::{Parser, Lua54};
+    use luaparse_rs::{Parser, Lua54};
 
     let input = "local f <close> = io.open('file')";
     let parser = Parser::<Lua54>::new(input).unwrap();
