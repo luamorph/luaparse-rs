@@ -13,6 +13,20 @@ pub mod types;
 pub mod stmt;
 pub mod expr;
 
+/// The main parser. Feed it Lua source code and get back an [`Ast`].
+///
+/// The type parameter `V` selects which Lua version's grammar to use.
+/// Pick one of [`Luau`](crate::Luau), [`Lua51`](crate::Lua51),
+/// [`Lua52`](crate::Lua52), [`Lua53`](crate::Lua53), or [`Lua54`](crate::Lua54).
+///
+/// # Example
+///
+/// ```rust
+/// use luaparse_rs::{Parser, Luau};
+///
+/// let parser = Parser::<Luau>::new("local x = 1").unwrap();
+/// let ast = parser.parse().unwrap();
+/// ```
 pub struct Parser<'src, V: LuaVersion> {
     tokens: Vec<(Token, Span)>,
     position: usize,
@@ -22,6 +36,10 @@ pub struct Parser<'src, V: LuaVersion> {
 }
 
 impl<'src, V: LuaVersion> Parser<'src, V> {
+    /// Creates a new parser from a source string.
+    ///
+    /// This tokenizes the input immediately. If the source contains invalid
+    /// tokens (like an unterminated string), you'll get a [`LexError`] here.
     pub fn new(source: &'src str) -> Result<Self, LexError> {
         let tokens = crate::lexer::lex_for_version::<V>(source)?;
         Ok(Self {
@@ -33,6 +51,10 @@ impl<'src, V: LuaVersion> Parser<'src, V> {
         })
     }
     
+    /// Parses the source and returns the full syntax tree.
+    ///
+    /// This consumes the parser. If you need type declarations (Luau),
+    /// use [`parse_with_types`](Self::parse_with_types) instead.
     pub fn parse(mut self) -> Result<Ast, ParseError> {
         let start = 0;
         let mut statements = Vec::new();
@@ -93,6 +115,11 @@ impl<'src, V: LuaVersion> Parser<'src, V> {
         Ok(Ast::new(block, self.comments))
     }
     
+    /// Parses the source and returns the syntax tree along with type declarations.
+    ///
+    /// This is the Luau variant of [`parse`](Self::parse). It pulls `type` and
+    /// `export type` declarations into a separate list so you can work with them
+    /// independently from the rest of the code.
     pub fn parse_with_types(mut self) -> Result<AstWithTypes, ParseError> {
         let mut type_declarations = Vec::new();
         let start = 0;
