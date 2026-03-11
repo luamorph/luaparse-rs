@@ -1,6 +1,9 @@
 # luaparse-rs
 
-A multi-version Lua parser written in Rust with support for **Lua 5.1, 5.2, 5.3, 5.4, and Luau** via compile-time feature flags.
+[![docs.rs](https://docs.rs/luaparse-rs/badge.svg)](https://docs.rs/luaparse-rs)
+[![crates.io](https://img.shields.io/crates/v/luaparse-rs.svg)](https://crates.io/crates/luaparse-rs)
+
+A multi-version Lua parser written in Rust with support for **Lua 5.1, 5.2, 5.3, 5.4, and Luau** via compile-time version selection.
 
 ## Features
 
@@ -41,6 +44,22 @@ use luaparse_rs::{Parser, Lua54};
 let parser = Parser::<Lua54>::new("local x <const> = 5").unwrap();
 let ast = parser.parse().unwrap();
 ```
+
+## AST Traversal
+
+Walk the syntax tree with the visitor traits, or use the quick closures:
+
+```rust
+use luaparse_rs::{Parser, Luau};
+
+let ast = Parser::<Luau>::new("local x = 1").unwrap().parse().unwrap();
+
+ast.for_each_identifier(|ident| {
+    println!("{}", ident.name);
+});
+```
+
+For full control, implement [`Visitor`](https://docs.rs/luaparse-rs/latest/luaparse_rs/ast/visitor/trait.Visitor.html) or [`VisitorMut`](https://docs.rs/luaparse-rs/latest/luaparse_rs/ast/visitor/trait.VisitorMut.html). See the [visitor module docs](https://docs.rs/luaparse-rs/latest/luaparse_rs/ast/visitor/index.html) for examples.
 
 ## License
 

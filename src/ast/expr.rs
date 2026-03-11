@@ -1,11 +1,19 @@
+//! Expression nodes in the syntax tree.
+
 use alloc::{boxed::Box, string::String, vec::Vec};
 
 use crate::Span;
 use super::common::{Identifier, Block, Parameter, TypeAnnotation};
 
+/// A single parsed expression.
+///
+/// Every expression has a [`kind`](Self::kind) that tells you what it is,
+/// and a [`span`](Self::span) pointing back into the source.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Expr {
+    /// What kind of expression this is.
     pub kind: ExprKind,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -19,37 +27,61 @@ impl Expr {
     }
 }
 
+/// All the different kinds of expression the parser can produce.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ExprKind {
+    /// The `nil` literal.
     Nil,
+    /// `true` or `false`.
     Boolean(bool),
+    /// A number like `42`, `3.14`, or `0xFF`.
     Number(NumberLiteral),
+    /// A string like `"hello"` or `'world'`.
     String(StringLiteral),
+    /// The `...` vararg expression.
     Vararg,
-    
+
+    /// A table constructor: `{1, 2, key = "val"}`.
     Table(TableConstructor),
+    /// An anonymous function: `function(x) return x end`.
     Function(FunctionExpr),
-    
+
+    /// A variable reference: `foo`.
     Identifier(Identifier),
+    /// A dot field access: `obj.field`.
     FieldAccess(FieldAccess),
+    /// A bracket index: `tbl[key]`.
     IndexAccess(IndexAccess),
-    
+
+    /// A unary operation: `-x`, `not x`, `#t`, `~x`.
     Unary(UnaryExpr),
+    /// A binary operation: `a + b`, `x and y`, `s .. t`.
     Binary(BinaryExpr),
-    
+
+    /// A function call: `foo(1, 2)`.
     Call(CallExpr),
+    /// A method call: `obj:method(1, 2)`.
     MethodCall(MethodCallExpr),
-    
+
+    /// A Luau if expression: `if cond then a else b`.
     IfExpression(IfExpression),
+    /// A Luau interpolated string: `` `hello {name}` ``.
     InterpolatedString(InterpolatedString),
+    /// A Luau type assertion: `expr :: Type`.
     TypeAssertion(TypeAssertion),
-    
+
+    /// A parenthesized expression: `(expr)`.
     Parenthesized(Box<Expr>),
 }
 
+/// A number literal, stored as the raw source text.
+///
+/// Use [`parse_f64`](Self::parse_f64) to get the numeric value.
 #[derive(Debug, Clone, PartialEq)]
 pub struct NumberLiteral {
+    /// The raw text from the source (e.g. `"0xFF"`, `"3.14e2"`).
     pub raw: String,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -76,9 +108,12 @@ impl NumberLiteral {
     }
 }
 
+/// A string literal with escape sequences already resolved.
 #[derive(Debug, Clone, PartialEq)]
 pub struct StringLiteral {
+    /// The string content after processing escapes.
     pub value: String,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -88,9 +123,12 @@ impl StringLiteral {
     }
 }
 
+/// A table constructor: `{1, 2, key = "val", [expr] = val}`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TableConstructor {
+    /// The fields in the table, in order.
     pub fields: Vec<TableField>,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -100,9 +138,12 @@ impl TableConstructor {
     }
 }
 
+/// A single entry in a table constructor.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TableField {
+    /// What kind of table entry this is.
     pub kind: TableFieldKind,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -112,18 +153,27 @@ impl TableField {
     }
 }
 
+/// The different ways to define a table entry.
 #[derive(Debug, Clone, PartialEq)]
 pub enum TableFieldKind {
+    /// `[expr] = value`.
     Bracketed { key: Expr, value: Expr },
+    /// `name = value`.
     Named { name: Identifier, value: Expr },
+    /// A positional value (no key), like `{1, 2, 3}`.
     Positional(Expr),
 }
 
+/// An anonymous function expression: `function(x, y) return x + y end`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct FunctionExpr {
+    /// The parameter list.
     pub parameters: Vec<Parameter>,
+    /// An optional return type annotation (Luau).
     pub return_type: Option<TypeAnnotation>,
+    /// The function body.
     pub body: Block,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -143,10 +193,14 @@ impl FunctionExpr {
     }
 }
 
+/// A dot field access: `obj.field`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct FieldAccess {
+    /// The expression being accessed.
     pub base: Box<Expr>,
+    /// The field name after the dot.
     pub field: Identifier,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -160,10 +214,14 @@ impl FieldAccess {
     }
 }
 
+/// A bracket index: `tbl[key]`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct IndexAccess {
+    /// The expression being indexed.
     pub base: Box<Expr>,
+    /// The index expression inside the brackets.
     pub index: Box<Expr>,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -177,10 +235,14 @@ impl IndexAccess {
     }
 }
 
+/// A unary operation like `-x` or `not cond`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct UnaryExpr {
+    /// Which operator.
     pub operator: UnaryOperator,
+    /// The expression it applies to.
     pub operand: Box<Expr>,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -194,11 +256,16 @@ impl UnaryExpr {
     }
 }
 
+/// The unary operators.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnaryOperator {
+    /// `-` (negation).
     Minus,
+    /// `not` (logical negation).
     Not,
+    /// `#` (length).
     Length,
+    /// `~` (bitwise not, Lua 5.3+).
     BitwiseNot,
 }
 
@@ -208,11 +275,16 @@ impl UnaryOperator {
     }
 }
 
+/// A binary operation like `a + b` or `x and y`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct BinaryExpr {
+    /// Which operator.
     pub operator: BinaryOperator,
+    /// The left operand.
     pub left: Box<Expr>,
+    /// The right operand.
     pub right: Box<Expr>,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -227,32 +299,54 @@ impl BinaryExpr {
     }
 }
 
+/// All the binary operators.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BinaryOperator {
+    /// `+`
     Add,
+    /// Subtraction.
     Subtract,
+    /// `*`
     Multiply,
+    /// `/`
     Divide,
+    /// `//` (Lua 5.3+, Luau).
     FloorDiv,
+    /// `%`
     Modulo,
+    /// `^`
     Power,
-    
+
+    /// `..` (string concatenation).
     Concat,
-    
+
+    /// `==`
     Equal,
+    /// `~=`
     NotEqual,
+    /// `<`
     Less,
+    /// `<=`
     LessEqual,
+    /// `>`
     Greater,
+    /// `>=`
     GreaterEqual,
-    
+
+    /// `and`
     And,
+    /// `or`
     Or,
 
+    /// `&` (Lua 5.3+).
     BitwiseAnd,
+    /// `|` (Lua 5.3+).
     BitwiseOr,
+    /// `~` (bitwise xor, Lua 5.3+).
     BitwiseXor,
+    /// `<<` (Lua 5.3+).
     LeftShift,
+    /// `>>` (Lua 5.3+).
     RightShift,
 }
 
@@ -279,10 +373,14 @@ impl BinaryOperator {
     }
 }
 
+/// A function call: `foo(1, 2)` or `foo "hello"` or `foo {1,2}`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct CallExpr {
+    /// The expression being called.
     pub function: Box<Expr>,
+    /// The arguments passed.
     pub arguments: Vec<Expr>,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -296,11 +394,16 @@ impl CallExpr {
     }
 }
 
+/// A method call: `obj:method(1, 2)`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct MethodCallExpr {
+    /// The object being called on.
     pub base: Box<Expr>,
+    /// The method name.
     pub method: Identifier,
+    /// The arguments passed.
     pub arguments: Vec<Expr>,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -315,12 +418,18 @@ impl MethodCallExpr {
     }
 }
 
+/// A Luau if/then/else expression: `if cond then a elseif cond2 then b else c`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct IfExpression {
+    /// The condition after `if`.
     pub condition: Box<Expr>,
+    /// The value when the condition is true.
     pub then_branch: Box<Expr>,
+    /// Zero or more `elseif` branches.
     pub elseif_branches: Vec<ElseIfExprBranch>,
+    /// The `else` value (always present in if expressions).
     pub else_branch: Box<Expr>,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -342,9 +451,12 @@ impl IfExpression {
     }
 }
 
+/// One `elseif cond then value` branch inside an [`IfExpression`].
 #[derive(Debug, Clone, PartialEq)]
 pub struct ElseIfExprBranch {
+    /// The condition after `elseif`.
     pub condition: Expr,
+    /// The value when this condition is true.
     pub then_branch: Expr,
 }
 
@@ -357,9 +469,12 @@ impl ElseIfExprBranch {
     }
 }
 
+/// A Luau interpolated string: `` `hello {name}, you are {age}` ``.
 #[derive(Debug, Clone, PartialEq)]
 pub struct InterpolatedString {
+    /// The alternating text and expression segments.
     pub segments: Vec<InterpolationSegment>,
+    /// Where it appears in the source.
     pub span: Span,
 }
 
@@ -369,16 +484,23 @@ impl InterpolatedString {
     }
 }
 
+/// A piece of an interpolated string.
 #[derive(Debug, Clone, PartialEq)]
 pub enum InterpolationSegment {
+    /// A literal text segment between expressions.
     Text(String),
+    /// An embedded `{expression}`.
     Expression(Expr),
 }
 
+/// A Luau type assertion: `expr :: Type`.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TypeAssertion {
+    /// The expression being asserted.
     pub expression: Box<Expr>,
+    /// The type being asserted.
     pub type_annotation: TypeAnnotation,
+    /// Where it appears in the source.
     pub span: Span,
 }
 

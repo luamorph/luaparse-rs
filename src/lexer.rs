@@ -1,8 +1,20 @@
+//! Turns source text into a stream of tokens.
+//!
+//! You normally won't use this module directly. The [`Parser`](crate::Parser)
+//! calls [`lex_for_version`] internally. But the types here are public so you
+//! can inspect tokens if you need to.
+
 use alloc::{string::String, vec::Vec, format};
 
 use logos::Logos;
 use crate::{Span, LexError};
 
+/// A single token produced by the lexer.
+///
+/// Includes Lua keywords, operators, literals, and punctuation.
+/// The lexer is version agnostic; version specific keyword demotion
+/// (e.g. treating `continue` as an identifier in Lua 5.1) happens
+/// in [`lex_for_version`].
 #[derive(Logos, Debug, Clone, PartialEq)]
 #[logos(skip r"[ \t\r\n]+")]
 pub enum Token {
@@ -241,9 +253,15 @@ pub enum Token {
     Eof,
 }
 
+/// A piece of a Luau interpolated string token.
+///
+/// The lexer splits `` `hello {expr} world` `` into a sequence of these parts
+/// so the parser can handle the embedded expressions.
 #[derive(Debug, Clone, PartialEq)]
 pub enum InterpolationPart {
+    /// A literal text segment.
     Text(String),
+    /// The byte range of an embedded expression.
     ExprSpan { start: usize, end: usize },
 }
 
@@ -344,7 +362,7 @@ fn parse_comment(lex: &mut logos::Lexer<Token>) -> Option<String> {
         let after_bracket = &rest[1..];
         let eq_count = after_bracket.chars().take_while(|&c| c == '=').count();
         if after_bracket.len() > eq_count && after_bracket[eq_count..].starts_with('[') {
-            // It's a block comment — find the matching closing ]=*]
+            // It's a block comment; find the matching closing ]=*]
             let closing = format!("]{}]", "=".repeat(eq_count));
             let block_start = 1 + eq_count + 1; // skip [=*[
             let content_start = start + block_start;
@@ -354,7 +372,7 @@ fn parse_comment(lex: &mut logos::Lexer<Token>) -> Option<String> {
                 lex.bump(block_start + end_pos + closing.len());
                 return Some(content);
             } else {
-                // Unterminated block comment — consume rest as comment
+                // Unterminated block comment; consume rest as comment
                 let content = source[content_start..].to_string();
                 lex.bump(source.len() - start);
                 return Some(content);
@@ -518,8 +536,14 @@ fn unescape_string(s: &str) -> String {
     result
 }
 
+/// Tokenizes source code into a list of `(Token, Span)` pairs.
+///
+/// This is the version agnostic entry point. If the source starts with a
+/// `#!` shebang line, it is silently skipped. For version aware tokenization
+/// (which demotes certain keywords to identifiers based on the Lua version),
+/// use [`lex_for_version`] instead.
 pub fn lex(source: &str) -> Result<Vec<(Token, Span)>, LexError> {
-    // skip shebang line if present — this is a unix execution hint, not a language token
+    // skip shebang line if present as this is a unix execution hint, not a language token
     let source = if source.starts_with("#!") {
         match source.find('\n') {
             Some(pos) => &source[pos + 1..],
@@ -616,7 +640,11 @@ fn validate_number(s: &str) -> bool {
     true
 }
 
-// Best choice..?
+/// Tokenizes source code with version aware keyword handling.
+///
+/// Calls [`lex`] first, then demotes keywords that don't exist in version `V`
+/// back to plain identifiers. For example, `continue` becomes
+/// `Token::Identifier("continue")` when parsing as [`Lua51`](crate::Lua51).
 pub fn lex_for_version<V: crate::marker::LuaVersion>(
     source: &str,
 ) -> Result<Vec<(Token, Span)>, LexError> {
