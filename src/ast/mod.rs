@@ -4,6 +4,7 @@ pub mod common;
 pub mod expr;
 pub mod stmt;
 pub mod types;
+pub mod visitor;
 
 pub use common::*;
 pub use expr::*;
