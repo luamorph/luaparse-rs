@@ -1,6 +1,6 @@
 [package]
 name = "luaparse-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Multi-version Lua parser supporting Lua 5.1-5.4 and Luau"
