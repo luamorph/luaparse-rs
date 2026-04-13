@@ -97,11 +97,37 @@ fn test_const_no_value_fails_luau() {
 }
 
 #[test]
-fn test_const_function_fails_luau() {
+fn test_const_function_luau() {
     let input = r#"const function foo() end"#;
     let parser = Parser::<Luau>::new(input).unwrap();
     let result = parser.parse();
-    assert!(result.is_err(), "const function should fail");
+    assert!(result.is_ok(), "Luau should support 'const function foo() end': {:?}", result.err());
+}
+
+#[test]
+fn test_const_function_sets_is_const_luau() {
+    let input = r#"const function foo() end"#;
+    let ast = Parser::<Luau>::new(input).unwrap().parse().unwrap();
+    let stmt = &ast.block.statements[0];
+    match &stmt.kind {
+        luaparse_rs::ast::StmtKind::LocalFunctionDeclaration(decl) => {
+            assert!(decl.is_const, "const function should have is_const = true");
+        }
+        other => panic!("Expected LocalFunctionDeclaration, got {:?}", other),
+    }
+}
+
+#[test]
+fn test_local_function_not_const_luau() {
+    let input = r#"local function foo() end"#;
+    let ast = Parser::<Luau>::new(input).unwrap().parse().unwrap();
+    let stmt = &ast.block.statements[0];
+    match &stmt.kind {
+        luaparse_rs::ast::StmtKind::LocalFunctionDeclaration(decl) => {
+            assert!(!decl.is_const, "local function should have is_const = false");
+        }
+        other => panic!("Expected LocalFunctionDeclaration, got {:?}", other),
+    }
 }
 
 #[test]

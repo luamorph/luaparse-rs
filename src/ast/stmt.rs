@@ -143,7 +143,7 @@ impl FunctionDeclaration {
     }
 }
 
-/// A `local function foo() end` declaration.
+/// A `local function foo() end` or `const function foo() end` declaration.
 #[derive(Debug, Clone, PartialEq)]
 pub struct LocalFunctionDeclaration {
     /// Attributes like `@native` (Luau).
@@ -156,6 +156,8 @@ pub struct LocalFunctionDeclaration {
     pub return_type: Option<TypeAnnotation>,
     /// The function body.
     pub body: Block,
+    /// `true` when declared with `const function` (Luau immutable binding).
+    pub is_const: bool,
     /// Where it appears in the source.
     pub span: Span,
 }
@@ -167,6 +169,7 @@ impl LocalFunctionDeclaration {
         parameters: Vec<Parameter>,
         return_type: Option<TypeAnnotation>,
         body: Block,
+        is_const: bool,
         span: Span,
     ) -> Self {
         Self {
@@ -175,6 +178,7 @@ impl LocalFunctionDeclaration {
             parameters,
             return_type,
             body,
+            is_const,
             span,
         }
     }

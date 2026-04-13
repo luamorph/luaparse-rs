@@ -38,7 +38,9 @@ pub trait LuaVersion: 'static {
     const HAS_BITWISE_OPS: bool;
     /// `<const>` and `<close>` variable attributes (Lua 5.4).
     const HAS_VARIABLE_ATTRIBUTES: bool;
-    /// `local const x = 5` immutable bindings (Luau).
+    /// `const x = 5` immutable bindings (Luau). at the time of writing, this
+    /// is gated behind `FFlag::LuauConst2` in Luau production builds, so it
+    /// may not be available in all Luau environments
     const HAS_CONST: bool;
 }
 

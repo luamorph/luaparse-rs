@@ -87,7 +87,7 @@ fn parse_local_statement<'src, V: LuaVersion>(
         
         let span = name.span.clone();
         return Ok(StmtKind::LocalFunctionDeclaration(
-            LocalFunctionDeclaration::new(attrs, name, parameters, return_type, body, span),
+            LocalFunctionDeclaration::new(attrs, name, parameters, return_type, body, false, span),
         ));
     }
     
@@ -115,13 +115,38 @@ fn parse_const_statement<'src, V: LuaVersion>(
 ) -> Result<StmtKind, ParseError> {
     parser.expect(Token::Const)?;
     
-    // `const function` is impossible
     if matches!(parser.current(), Token::Function) {
-        return Err(ParseError::InvalidSyntax {
-            message: "cannot use 'const' with function declarations".to_string(),
-            span: parser.current_span(),
-            help: Some("use 'local function' instead".to_string()),
-        });
+        parser.advance();
+        
+        let attrs = if V::HAS_ATTRIBUTES && matches!(parser.current(), Token::At) {
+            parser.parse_attributes()?
+        } else {
+            Vec::new()
+        };
+        
+        let name = parser.parse_identifier()?;
+        
+        if V::HAS_TYPE_ANNOTATIONS && matches!(parser.current(), Token::Less) {
+            parser.skip_generic_args()?;
+        }
+        
+        parser.expect(Token::LParen)?;
+        let parameters = parser.parse_parameters()?;
+        parser.expect(Token::RParen)?;
+        
+        let return_type = if V::HAS_TYPE_ANNOTATIONS && matches!(parser.current(), Token::Colon) {
+            Some(parser.parse_type_annotation()?)
+        } else {
+            None
+        };
+        
+        let body = parser.parse_block_until(&[Token::End])?;
+        parser.expect(Token::End)?;
+        
+        let span = name.span.clone();
+        return Ok(StmtKind::LocalFunctionDeclaration(
+            LocalFunctionDeclaration::new(attrs, name, parameters, return_type, body, true, span),
+        ));
     }
     
     let mut names = vec![parser.parse_variable_name()?];
@@ -131,7 +156,6 @@ fn parse_const_statement<'src, V: LuaVersion>(
         names.push(parser.parse_variable_name()?);
     }
     
-    // const declarations MUST have initializers
     if !matches!(parser.current(), Token::Eq) {
         return Err(ParseError::InvalidSyntax {
             message: "const declaration must have a value".to_string(),
