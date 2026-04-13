@@ -457,87 +457,41 @@ impl<'src, V: LuaVersion> Parser<'src, V> {
         while matches!(self.current(), Token::At) {
             self.advance();
             
-            let name = self.parse_identifier()?;
-            let fields = if matches!(self.current(), Token::LBracket) {
+            if matches!(self.current(), Token::LBracket) {
                 self.advance();
-                let fields = self.parse_attribute_fields()?;
+                
+                while !matches!(self.current(), Token::RBracket | Token::Eof) {
+                    self.skip_comments();
+                    
+                    if matches!(self.current(), Token::Comma) {
+                        self.advance();
+                        continue;
+                    }
+                    
+                    let name = self.parse_identifier()?;
+                    let args = if matches!(self.current(), Token::LBrace) {
+                        let table = self.parse_expression()?;
+                        vec![table]
+                    } else {
+                        Vec::new()
+                    };
+                    
+                    let span = name.span.clone();
+                    attributes.push(Attribute::new(name, args, span));
+                    
+                    if !matches!(self.current(), Token::Comma | Token::RBracket) {
+                        break;
+                    }
+                }
+                
                 self.expect(Token::RBracket)?;
-                Some(fields)
             } else {
-                None
-            };
-            
-            let span = name.span.clone();
-            attributes.push(Attribute::new(name, fields, span));
+                let name = self.parse_identifier()?;
+                let span = name.span.clone();
+                attributes.push(Attribute::new(name, Vec::new(), span));
+            }
         }
         
         Ok(attributes)
-    }
-    
-    fn parse_attribute_fields(&mut self) -> Result<Vec<AttributeField>, ParseError> {
-        let mut fields = Vec::new();
-        
-        while !matches!(self.current(), Token::RBracket | Token::Eof) {
-            self.skip_comments();
-            
-            if matches!(self.current(), Token::Comma) {
-                self.advance();
-                continue;
-            }
-            
-            let checkpoint = self.checkpoint();
-            let key = if let Ok(ident) = self.parse_identifier() {
-                if matches!(self.current(), Token::Eq) {
-                    self.advance();
-                    Some(ident)
-                } else {
-                    self.restore(checkpoint);
-                    None
-                }
-            } else {
-                None
-            };
-            
-            let value = self.parse_attribute_value()?;
-            fields.push(AttributeField::new(key, value));
-            
-            if !self.consume(Token::Comma) {
-                break;
-            }
-        }
-        
-        Ok(fields)
-    }
-    
-    fn parse_attribute_value(&mut self) -> Result<AttributeValue, ParseError> {
-        match self.current() {
-            Token::String(s) => {
-                let s = s.clone();
-                self.advance();
-                Ok(AttributeValue::String(s))
-            }
-            Token::Number(n) => {
-                let n = n.clone();
-                self.advance();
-                Ok(AttributeValue::Number(n))
-            }
-            Token::True => {
-                self.advance();
-                Ok(AttributeValue::Boolean(true))
-            }
-            Token::False => {
-                self.advance();
-                Ok(AttributeValue::Boolean(false))
-            }
-            Token::Identifier(_) => {
-                let ident = self.parse_identifier()?;
-                Ok(AttributeValue::Identifier(ident))
-            }
-            _ => Err(ParseError::UnexpectedToken {
-                expected: vec!["string, number, boolean, or identifier".to_string()],
-                found: format!("{:?}", self.current()),
-                span: self.current_span(),
-            }),
-        }
     }
 }

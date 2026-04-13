@@ -482,49 +482,25 @@ impl ReturnStatement {
     }
 }
 
-/// An attribute like `@native` or `@checked` (Luau).
+/// An attribute like `@native`, `@[native]`, or `@[deprecated {use = "newFunc"}]` (Luau).
+///
+/// Luau supports both bare (`@name`) and bracket (`@[name {args}]`) syntax.
+/// The args field holds any expression arguments passed to the attribute,
+/// typically table constructors with named fields
 #[derive(Debug, Clone, PartialEq)]
 pub struct Attribute {
-    /// The attribute name (e.g. `native`).
+    /// The attribute name (e.g. `native`, `deprecated`).
     pub name: Identifier,
-    /// Optional fields inside the attribute.
-    pub fields: Option<Vec<AttributeField>>,
+    /// Expression arguments passed to the attribute (e.g. a table constructor).
+    pub args: Vec<Expr>,
     /// Where it appears in the source.
     pub span: Span,
 }
 
 impl Attribute {
-    pub fn new(name: Identifier, fields: Option<Vec<AttributeField>>, span: Span) -> Self {
-        Self { name, fields, span }
+    pub fn new(name: Identifier, args: Vec<Expr>, span: Span) -> Self {
+        Self { name, args, span }
     }
-}
-
-/// A single field inside an [`Attribute`].
-#[derive(Debug, Clone, PartialEq)]
-pub struct AttributeField {
-    /// The field name, if it's a key/value pair.
-    pub key: Option<Identifier>,
-    /// The field value.
-    pub value: AttributeValue,
-}
-
-impl AttributeField {
-    pub fn new(key: Option<Identifier>, value: AttributeValue) -> Self {
-        Self { key, value }
-    }
-}
-
-/// A value inside an [`AttributeField`].
-#[derive(Debug, Clone, PartialEq)]
-pub enum AttributeValue {
-    /// A string literal.
-    String(String),
-    /// A number literal (stored as the raw text).
-    Number(String),
-    /// `true` or `false`.
-    Boolean(bool),
-    /// A plain identifier.
-    Identifier(Identifier),
 }
 
 /// A `type Foo = ...` declaration (Luau).

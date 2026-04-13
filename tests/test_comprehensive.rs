@@ -823,7 +823,7 @@ fn test_typeof_nested_luau() {
 
 #[test]
 fn test_native_with_fields_luau() {
-    let input = "@native[opt=true] function foo() end";
+    let input = "@[native] function foo() end";
     let parser = Parser::<Luau>::new(input).unwrap();
     let result = parser.parse();
     assert!(result.is_ok());
