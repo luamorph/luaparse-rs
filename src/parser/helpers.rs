@@ -176,6 +176,11 @@ impl<'src, V: LuaVersion> Parser<'src, V> {
     }
     
     pub(super) fn skip_type_expression(&mut self) -> Result<(), ParseError> {
+        // leading | or &
+        if matches!(self.current(), Token::Pipe | Token::Ampersand) {
+            self.advance();
+        }
+        
         loop {
             self.skip_type_primary()?;
             

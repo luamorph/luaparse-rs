@@ -56,10 +56,25 @@ impl<'src, V: LuaVersion> Parser<'src, V> {
 
     fn parse_union_or_intersection(&mut self) -> Result<TypeExpr, ParseError> {
         let start = self.current_span().start;
-        let mut types = vec![self.parse_type_primary()?];
+        let mut types = Vec::new();
 
         let mut is_union = false;
         let mut is_intersection = false;
+
+        // leading | or &
+        match self.current() {
+            Token::Pipe => {
+                is_union = true;
+                self.advance();
+            }
+            Token::Ampersand => {
+                is_intersection = true;
+                self.advance();
+            }
+            _ => {}
+        }
+
+        types.push(self.parse_type_primary()?);
 
         loop {
             match self.current() {
