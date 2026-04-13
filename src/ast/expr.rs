@@ -69,6 +69,8 @@ pub enum ExprKind {
     InterpolatedString(InterpolatedString),
     /// A Luau type assertion: `expr :: Type`.
     TypeAssertion(TypeAssertion),
+    /// A Luau explicit type instantiation: `f<<number>>(5)`.
+    TypeInstantiation(TypeInstantiation),
 
     /// A parenthesized expression: `(expr)`.
     Parenthesized(Box<Expr>),
@@ -508,6 +510,30 @@ impl TypeAssertion {
     pub fn new(expression: Expr, type_annotation: TypeAnnotation, span: Span) -> Self {
         Self {
             expression: Box::new(expression),
+            type_annotation,
+            span,
+        }
+    }
+}
+
+/// A Luau explicit type instantiation: `f<<number>>(5)`.
+///
+/// The `<<` and `>>` delimiters are split by the parser into individual
+/// angle brackets so the type arguments can be parsed normally
+#[derive(Debug, Clone, PartialEq)]
+pub struct TypeInstantiation {
+    /// The expression being instantiated (e.g. the function reference).
+    pub expr: Box<Expr>,
+    /// The span covering the type arguments between `<<` and `>>`.
+    pub type_annotation: TypeAnnotation,
+    /// Where it appears in the source.
+    pub span: Span,
+}
+
+impl TypeInstantiation {
+    pub fn new(expr: Expr, type_annotation: TypeAnnotation, span: Span) -> Self {
+        Self {
+            expr: Box::new(expr),
             type_annotation,
             span,
         }

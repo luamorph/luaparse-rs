@@ -245,6 +245,15 @@ impl<'src, V: LuaVersion> Parser<'src, V> {
             self.tokens.insert(self.position + 1, (Token::Greater, mid..span.end));
         }
     }
+    
+    pub(super) fn split_left_shift(&mut self) {
+        if matches!(self.current(), Token::LeftShift) {
+            let span = self.current_span();
+            let mid = span.start + 1;
+            self.tokens[self.position] = (Token::Less, span.start..mid);
+            self.tokens.insert(self.position + 1, (Token::Less, mid..span.end));
+        }
+    }
 
     fn is_eof(&self) -> bool {
         matches!(self.current(), Token::Eof)

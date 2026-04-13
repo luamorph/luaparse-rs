@@ -161,6 +161,19 @@ fn parse_primary_expression<'src, V: LuaVersion>(
                     span,
                 );
             }
+            Token::LeftShift if V::HAS_TYPE_ANNOTATIONS => {
+                parser.split_left_shift();
+                parser.advance(); // first <
+                let type_start = parser.current_span().start;
+                parser.skip_generic_args()?;
+                let type_end = parser.current_span().end;
+                let type_annotation = TypeAnnotation::new(type_start..type_end);
+                let span = expr.span.start..type_end;
+                expr = Expr::new(
+                    ExprKind::TypeInstantiation(TypeInstantiation::new(expr, type_annotation, span.clone())),
+                    span,
+                );
+            }
             _ => break,
         }
     }

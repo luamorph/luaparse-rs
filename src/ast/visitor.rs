@@ -299,6 +299,9 @@ pub fn walk_expr<V: Visitor + ?Sized>(v: &mut V, expr: &Expr) {
             v.visit_expr(&assertion.expression);
             // TypeAnnotation is span-only; so there's no TypeExpr to visit here.
         }
+        ExprKind::TypeInstantiation(inst) => {
+            v.visit_expr(&inst.expr);
+        }
         ExprKind::Parenthesized(inner) => {
             v.visit_expr(inner);
         }
@@ -697,6 +700,9 @@ pub fn walk_expr_mut<V: VisitorMut + ?Sized>(v: &mut V, expr: &mut Expr) {
         }
         ExprKind::TypeAssertion(assertion) => {
             v.visit_expr(&mut assertion.expression);
+        }
+        ExprKind::TypeInstantiation(inst) => {
+            v.visit_expr(&mut inst.expr);
         }
         ExprKind::Parenthesized(inner) => {
             v.visit_expr(inner);
