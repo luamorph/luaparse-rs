@@ -474,9 +474,22 @@ impl<'src, V: LuaVersion> Parser<'src, V> {
                     }
                     
                     let name = self.parse_identifier()?;
-                    let args = if matches!(self.current(), Token::LBrace) {
-                        let table = self.parse_expression()?;
-                        vec![table]
+                    let args = if matches!(self.current(), Token::LParen) {
+                        self.advance();
+                        let mut exprs = Vec::new();
+                        while !matches!(self.current(), Token::RParen | Token::Eof) {
+                            if matches!(self.current(), Token::Comma) {
+                                self.advance();
+                                continue;
+                            }
+                            exprs.push(self.parse_expression()?);
+                        }
+                        self.expect(Token::RParen)?;
+                        exprs
+                    } else if matches!(self.current(), Token::LBrace) {
+                        vec![self.parse_expression()?]
+                    } else if matches!(self.current(), Token::String(_)) {
+                        vec![self.parse_expression()?]
                     } else {
                         Vec::new()
                     };

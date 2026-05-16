@@ -932,3 +932,75 @@ fn test_hex_float() {
     let result = parser.parse();
     assert!(result.is_ok());
 }
+
+#[test]
+fn test_integer_literal_luau() {
+    let input = "local x = 123i";
+    let parser = Parser::<Luau>::new(input).unwrap();
+    let result = parser.parse();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_integer_literal_hex_luau() {
+    let input = "local x = 0xABABi";
+    let parser = Parser::<Luau>::new(input).unwrap();
+    let result = parser.parse();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_integer_literal_binary_luau() {
+    let input = "local x = 0b1000_1000i";
+    let parser = Parser::<Luau>::new(input).unwrap();
+    let result = parser.parse();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_integer_literal_underscore_luau() {
+    let input = "local x = 1_000i";
+    let parser = Parser::<Luau>::new(input).unwrap();
+    let result = parser.parse();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_integer_literal_not_consumed_before_ident() {
+    let input = "local x = 123items";
+    let parser = Parser::<Luau>::new(input).unwrap();
+    let result = parser.parse();
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_attribute_parenthesized_args_luau() {
+    let input = r#"@[deprecated("use newFunc")] function foo() end"#;
+    let parser = Parser::<Luau>::new(input).unwrap();
+    let result = parser.parse();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_attribute_multiple_args_luau() {
+    let input = "@[native(1, 2, 3)] function foo() end";
+    let parser = Parser::<Luau>::new(input).unwrap();
+    let result = parser.parse();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_attribute_string_shorthand_luau() {
+    let input = r#"@[deprecated "use newFunc"] function foo() end"#;
+    let parser = Parser::<Luau>::new(input).unwrap();
+    let result = parser.parse();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_attribute_mixed_comma_separated_luau() {
+    let input = r#"@[a, b("x"), c] function foo() end"#;
+    let parser = Parser::<Luau>::new(input).unwrap();
+    let result = parser.parse();
+    assert!(result.is_ok());
+}
