@@ -76,14 +76,15 @@ pub enum ExprKind {
     Parenthesized(Box<Expr>),
 }
 
-/// A number literal, stored as the raw source text.
+/// A number literal, stored as the raw source text
 ///
-/// Use [`parse_f64`](Self::parse_f64) to get the numeric value.
+/// Use [`parse_f64`](Self::parse_f64) to get the numeric value, or
+/// [`parse_i64`](Self::parse_i64) for integer literals (Luau `123i` syntax)
 #[derive(Debug, Clone, PartialEq)]
 pub struct NumberLiteral {
-    /// The raw text from the source (e.g. `"0xFF"`, `"3.14e2"`).
+    /// The raw text from the source (e.g. `"0xFF"`, `"3.14e2"`, `"123i"`)
     pub raw: String,
-    /// Where it appears in the source.
+    /// Where it appears in the source
     pub span: Span,
 }
 
@@ -91,12 +92,17 @@ impl NumberLiteral {
     pub fn new(raw: String, span: Span) -> Self {
         Self { raw, span }
     }
-    
+
+    /// Whether this is a Luau 64-bit integer literal (ends with `i`)
+    pub fn is_integer(&self) -> bool {
+        self.raw.ends_with('i')
+    }
+
     pub fn parse_f64(&self) -> Option<f64> {
-        let cleaned = self.raw.replace('_', "");
-        
+        let raw = self.raw.strip_suffix('i').unwrap_or(&self.raw);
+        let cleaned = raw.replace('_', "");
+
         if cleaned.starts_with("0x") || cleaned.starts_with("0X") {
-            // TODO
             u64::from_str_radix(&cleaned[2..].split('.').next()?, 16)
                 .ok()
                 .map(|v| v as f64)
@@ -104,6 +110,23 @@ impl NumberLiteral {
             u64::from_str_radix(&cleaned[2..], 2)
                 .ok()
                 .map(|v| v as f64)
+        } else {
+            cleaned.parse().ok()
+        }
+    }
+
+    /// Parse as a 64-bit integer (only valid for `i` suffixed literals)
+    pub fn parse_i64(&self) -> Option<i64> {
+        if !self.is_integer() {
+            return None;
+        }
+        let raw = self.raw.strip_suffix('i').unwrap_or(&self.raw);
+        let cleaned = raw.replace('_', "");
+
+        if cleaned.starts_with("0x") || cleaned.starts_with("0X") {
+            u64::from_str_radix(&cleaned[2..], 16).ok().map(|v| v as i64)
+        } else if cleaned.starts_with("0b") || cleaned.starts_with("0B") {
+            u64::from_str_radix(&cleaned[2..], 2).ok().map(|v| v as i64)
         } else {
             cleaned.parse().ok()
         }

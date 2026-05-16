@@ -102,7 +102,7 @@ pub enum Token {
     #[regex(r"[\p{L}_][\p{L}\p{N}_]*", |lex| lex.slice().to_string())]
     Identifier(String),
     
-   #[regex(r"0[xX][0-9a-fA-F_]*(\.[0-9a-fA-F_]*)?([pP][+-]?\d*)?|\d[0-9_]*(\.\d[0-9_]*)?([eE][+-]?\d*)?|\.\d[0-9_]*([eE][+-]?\d*)?|0[bB][01_]*", |lex| lex.slice().to_string())]
+   #[regex(r"0[xX][0-9a-fA-F_]*(\.[0-9a-fA-F_]*)?([pP][+-]?\d*)?|\d[0-9_]*(\.\d[0-9_]*)?([eE][+-]?\d*)?|\.\d[0-9_]*([eE][+-]?\d*)?|0[bB][01_]*", parse_number)]
     Number(String),
     
     #[regex(r#""([^"\\]|\\.)*""#, parse_string)]
@@ -263,6 +263,24 @@ pub enum InterpolationPart {
     Text(String),
     /// The byte range of an embedded expression.
     ExprSpan { start: usize, end: usize },
+}
+
+fn parse_number(lex: &mut logos::Lexer<Token>) -> Option<String> {
+    let mut raw = lex.slice().to_string();
+    let source = lex.source();
+    let end = lex.span().end;
+
+    if let Some(rest) = source.get(end..) {
+        if let Some(after_i) = rest.strip_prefix('i') {
+            let next = after_i.chars().next();
+            if !next.map_or(false, |c| c.is_alphanumeric() || c == '_') {
+                lex.bump(1);
+                raw.push('i');
+            }
+        }
+    }
+
+    Some(raw)
 }
 
 fn parse_string(lex: &mut logos::Lexer<Token>) -> Option<String> {
@@ -580,27 +598,31 @@ pub fn lex(source: &str) -> Result<Vec<(Token, Span)>, LexError> {
 }
 
 fn validate_number(s: &str) -> bool {
+    let (s, is_integer) = match s.strip_suffix('i') {
+        Some(stripped) => (stripped, true),
+        None => (s, false),
+    };
+
     if s.starts_with("0x") || s.starts_with("0X") {
-        // HEX
-        // has to have atleast one digit after 0x
         let after_prefix = &s[2..];
         if after_prefix.is_empty() {
             return false;
         }
-        
-        // check for valid hex with the optional p exponent
+
         let parts: Vec<&str> = after_prefix.split(|c| c == 'p' || c == 'P').collect();
         if parts.len() > 2 {
             return false;
         }
-        
-        // the first part must be valid hex (with an optional .)
+
         let hex_part = parts[0].replace('_', "");
         if !hex_part.chars().all(|c| c.is_ascii_hexdigit() || c == '.') {
             return false;
         }
-        
-        // if we encounter an exponent, then we validate it
+
+        if is_integer && (hex_part.contains('.') || parts.len() > 1) {
+            return false;
+        }
+
         if parts.len() == 2 {
             let exp = parts[1].replace('_', "");
             let exp = exp.trim_start_matches('+').trim_start_matches('-');
@@ -609,34 +631,34 @@ fn validate_number(s: &str) -> bool {
             }
         }
     } else if s.starts_with("0b") || s.starts_with("0B") {
-        // BINARY
-        // has to have atleast one digit
         let after_prefix = &s[2..].replace('_', "");
         if after_prefix.is_empty() || !after_prefix.chars().all(|c| c == '0' || c == '1') {
             return false;
         }
     } else {
-        // DECIMAL
         let cleaned = s.replace('_', "");
-        
-        // has to have at least one digit somewhere
+
         if !cleaned.chars().any(|c| c.is_ascii_digit()) {
             return false;
         }
-        
+
+        if is_integer && (cleaned.contains('.') || cleaned.contains('e') || cleaned.contains('E')) {
+            return false;
+        }
+
         if cleaned.contains('e') || cleaned.contains('E') {
             let parts: Vec<&str> = cleaned.split(|c| c == 'e' || c == 'E').collect();
             if parts.len() != 2 {
                 return false;
             }
-            
+
             let exp = parts[1].trim_start_matches('+').trim_start_matches('-');
             if exp.is_empty() || !exp.chars().all(|c| c.is_ascii_digit()) {
                 return false;
             }
         }
     }
-    
+
     true
 }
 
