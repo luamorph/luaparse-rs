@@ -60,6 +60,7 @@ fn parse_binary_expression<'src, V: LuaVersion>(
         }
         
         parser.advance();
+        parser.skip_comments();
         let right = parse_binary_expression(parser, right_bp)?;
         
         let span = left.span.start..right.span.end;

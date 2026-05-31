@@ -556,13 +556,12 @@ fn unescape_string(s: &str) -> String {
 
 /// Tokenizes source code into a list of `(Token, Span)` pairs.
 ///
-/// This is the version agnostic entry point. If the source starts with a
-/// `#!` shebang line, it is silently skipped. For version aware tokenization
-/// (which demotes certain keywords to identifiers based on the Lua version),
-/// use [`lex_for_version`] instead.
+/// This is the version agnostic entry point. If the first line starts with
+/// `#`, it is silently skipped. For version aware tokenization (which demotes
+/// certain keywords to identifiers based on the Lua version), use
+/// [`lex_for_version`] instead.
 pub fn lex(source: &str) -> Result<Vec<(Token, Span)>, LexError> {
-    // skip shebang line if present as this is a unix execution hint, not a language token
-    let source = if source.starts_with("#!") {
+    let source = if source.starts_with('#') {
         match source.find('\n') {
             Some(pos) => &source[pos + 1..],
             None => "",
