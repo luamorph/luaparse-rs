@@ -33,6 +33,35 @@ fn test_underscore_in_number_luau() {
 }
 
 #[test]
+fn test_superflow_mixed_base_underscores_luau() {
+    use luaparse_rs::ast::expr::ExprKind;
+    use luaparse_rs::ast::stmt::StmtKind;
+
+    let cases = [
+        ("local x = 0X3__F2B__", 16171.0),
+        ("local x = 0B101__1111_", 95.0),
+        ("local x = 0X2A_", 42.0),
+        ("local x = 0x_FF", 255.0),
+    ];
+    for (input, want) in cases {
+        let parser = Parser::<Luau>::new(input).unwrap();
+        let ast = parser.parse().unwrap_or_else(|e| panic!("{input}: {e:?}"));
+        match &ast.block.statements[0].kind {
+            StmtKind::LocalDeclaration(decl) => {
+                let expr = &decl.values.as_ref().expect(input)[0];
+                match &expr.kind {
+                    ExprKind::Number(num) => {
+                        assert_eq!(num.parse_f64(), Some(want), "{input}");
+                    }
+                    other => panic!("{input}: not a number: {other:?}"),
+                }
+            }
+            other => panic!("{input}: not a local: {other:?}"),
+        }
+    }
+}
+
+#[test]
 fn test_long_string_level0_lua51() {
     let input = r#"local x = [[hello]]"#;
     let parser = Parser::<Lua51>::new(input).unwrap();
